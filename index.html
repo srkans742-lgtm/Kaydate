@@ -74,4 +74,13 @@ window.show=function(t,el){document.querySelectorAll(".nav button").forEach(x=>x
 window.importLink=function(){const u=document.getElementById("shareLink").value.trim();if(!u)return alert("Bağlantı gir.");places.unshift({name:"Paylaşılan yer",city:"",cat:"Diğer",done:false,note:"Bağlantıdan kaydedildi",url:u});save();alert("Kaydedildi ❤️");};
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 })();
+</script><script>
+(function(){
+const esc2=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+window.esc=esc2;
+window.render=function(q=""){const a=window.places.filter(p=>(p.name+" "+(p.city||"")+" "+p.cat+" "+(p.note||"")).toLowerCase().includes(q.toLowerCase()));document.getElementById("content").innerHTML='<section class="hero"><h1>Bugün nereye gitmek istersin?</h1><p>Beğendiğin yerleri kaydet, planla ve git.</p><button class="btn" onclick="planner()" style="margin-top:14px">✨ Bana gezi planla</button></section><div class="row">'+["Tümü","Restoran","Kafe","Gezi","Doğa","Otel","Plaj"].map(x=>'<button class="chip" onclick="filterCat(\''+x+'\')">'+x+'</button>').join("")+'</div><div class="section"><h2>✨ Keşfet</h2></div><div class="cards">'+(a.map(card).join("")||'<div class="empty">Sonuç bulunamadı.</div>')+'</div>';};
+window.toggle=function(i){window.places[i].done=!window.places[i].done;save();render(document.getElementById("search").value);};
+window.filterCat=function(cat){if(cat==="Tümü"){render(document.getElementById("search").value);return;}const a=window.places.filter(p=>p.cat===cat);document.getElementById("content").innerHTML='<div class="section"><h2>'+esc(cat)+'</h2></div><div class="cards">'+a.map((p,i)=>card(p,window.places.indexOf(p))).join("")+'</div>';};
+render();
+})();
 </script></body></html>
