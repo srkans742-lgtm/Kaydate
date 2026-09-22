@@ -1,0 +1,1 @@
+# KayDate\n\nKayDate MVP — Keşfet, kaydet, git.\n
