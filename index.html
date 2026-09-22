@@ -17,11 +17,12 @@ main{padding:8px 18px 105px}.hero{background:#111827;color:#fff;border-radius:25
 .modal{display:none;position:fixed;inset:0;background:#0007;z-index:10;align-items:flex-end}.sheet{background:#fff;width:100%;max-width:560px;margin:auto;border-radius:25px 25px 0 0;padding:21px;max-height:90vh;overflow:auto}.sheet input,.sheet select,.sheet textarea{width:100%;padding:13px;margin:6px 0;border:1px solid #ddd;border-radius:12px;font-size:16px;font-family:inherit}.sheet textarea{min-height:80px}.sheet .primary{width:100%;padding:14px;border:0;border-radius:13px;font-weight:800;margin-top:7px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:#f7f7fa;border-radius:15px;padding:15px;text-align:center}.stat b{display:block;font-size:22px}.empty{text-align:center;padding:35px 15px;color:#777}
 .mapbox{height:310px;border-radius:20px;overflow:hidden;background:#eef0f4}.mapbox iframe{width:100%;height:100%;border:0}.linkbox{background:#f5f5f8;border-radius:14px;padding:12px;font-size:13px;word-break:break-all}
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.KAYDATE_SUPABASE={url:"https://qmvkkhywhruarwnfgxce.supabase.co",key:"sb_publishable_tAlzfUUk3VUvJAHCZ9sRag_8WTaik_r"};window.sb=window.supabase.createClient(KAYDATE_SUPABASE.url,KAYDATE_SUPABASE.key);</script><style>.authbar{display:flex;gap:8px;margin:10px 18px}.authbar button{border:0;border-radius:12px;padding:10px 13px;background:#eeeafd;color:#5145cd;font-weight:700}.authpill{margin:10px 18px;color:#666;font-size:13px}</style></head>
 <body><div class="app">
 <header class="top"><div class="brand">Kay<span>Date</span> 📍</div><div class="sub">Keşfet. Kaydet. Planla. Git.</div></header>
 <input id="search" class="search" placeholder="Yer, şehir veya kategori ara…">
-<main id="content"></main><button class="add" onclick="openAdd()">+</button>
+<div id="authbar" class="authbar"><button onclick="authOpen('login')">Giriş yap</button><button onclick="authOpen('signup')">Kayıt ol</button></div><div id="authpill" class="authpill"></div>
+<div id="authmodal" class="modal" onclick="if(event.target.id==='authmodal')authClose()"><div class="sheet"><h2 id="authtitle">KayDate hesabı</h2><input id="aemail" type="email" placeholder="E-posta"><input id="apass" type="password" placeholder="Şifre"><button class="primary" onclick="authSubmit()">Devam et</button><button class="btn light" style="width:100%;margin-top:8px" onclick="authClose()">Kapat</button></div></div><main id="content"></main><button class="add" onclick="openAdd()">+</button>
 <nav class="nav"><button class="active" onclick="show('home',this)"><b>⌂</b>Ana Sayfa</button><button onclick="show('map',this)"><b>🗺</b>Harita</button><button onclick="openAdd()"><b>＋</b>Kaydet</button><button onclick="show('map',this)"><b>🗺</b>Harita</button><button onclick="show('saved',this)"><b>♥</b>Listelerim</button><button onclick="show('profile',this)"><b>●</b>Profil</button></nav>
 </div>
 
@@ -83,4 +84,14 @@ window.toggle=function(i){window.places[i].done=!window.places[i].done;save();re
 window.filterCat=function(cat){if(cat==="Tümü"){render(document.getElementById("search").value);return;}const a=window.places.filter(p=>p.cat===cat);document.getElementById("content").innerHTML='<div class="section"><h2>'+esc(cat)+'</h2></div><div class="cards">'+a.map((p,i)=>card(p,window.places.indexOf(p))).join("")+'</div>';};
 render();
 })();
+</script><script>
+let authMode="login";
+window.authOpen=function(m){authMode=m;document.getElementById("authtitle").textContent=m==="login"?"KayDate'e giriş":"KayDate'e kayıt ol";document.getElementById("authmodal").style.display="flex"};
+window.authClose=function(){document.getElementById("authmodal").style.display="none"};
+window.authSubmit=async function(){const email=document.getElementById("aemail").value.trim(),password=document.getElementById("apass").value;if(!email||password.length<6)return alert("E-posta ve en az 6 karakter şifre gerekli.");const r=authMode==="login"?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password});if(r.error)return alert(r.error.message);authClose();updateAuth()};
+window.updateAuth=async function(){const {data}=await sb.auth.getUser();const b=document.getElementById("authbar"),p=document.getElementById("authpill");if(data.user){b.innerHTML='<button onclick="logout()">Çıkış yap</button>';p.textContent="☁️ Buluta bağlı: "+data.user.email}else{p.textContent="Cihazda çalışan misafir modu aktif."}};
+window.logout=async function(){await sb.auth.signOut();updateAuth()};
+window.syncPlaces=async function(){const {data:{user}}=await sb.auth.getUser();if(!user)return;for(const p of places){let {data:pl}=await sb.from("places").select("id").eq("name",p.name).eq("city",p.city||"").maybeSingle();if(!pl){const ins=await sb.from("places").insert({name:p.name,city:p.city||null,category:p.cat,source_url:p.url||null}).select("id").single();pl=ins.data}if(pl)await sb.from("saved_places").upsert({user_id:user.id,place_id:pl.id,status:p.done?"visited":"want",note:p.note||null},{onConflict:"user_id,place_id"});}};
+const oldAdd=window.addPlace;window.addPlace=async function(){oldAdd();setTimeout(syncPlaces,400)};
+updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
 </script></body></html>
