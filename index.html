@@ -26,7 +26,45 @@ main{padding:8px 18px 105px}.hero{background:#111827;color:#fff;border-radius:25
 .detail-desc{color:#555;line-height:1.55;margin:10px 0}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .detail-item{background:#f6f6f8;border-radius:13px;padding:11px;font-size:13px}
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.KAYDATE_SUPABASE={url:"https://qmvkkhywhruarwnfgxce.supabase.co",key:"sb_publishable_tAlzfUUk3VUvJAHCZ9sRag_8WTaik_r"};window.sb=window.supabase.createClient(KAYDATE_SUPABASE.url,KAYDATE_SUPABASE.key);</script><style>.authbar{display:flex;gap:8px;margin:10px 18px}.authbar button{border:0;border-radius:12px;padding:10px 13px;background:#eeeafd;color:#5145cd;font-weight:700}.authpill{margin:10px 18px;color:#666;font-size:13px}</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.KAYDATE_SUPABASE={url:"https://qmvkkhywhruarwnfgxce.supabase.co",key:"sb_publishable_tAlzfUUk3VUvJAHCZ9sRag_8WTaik_r"};window.sb=window.supabase.createClient(KAYDATE_SUPABASE.url,KAYDATE_SUPABASE.key);</script><style>.authbar{display:flex;gap:8px;margin:10px 18px}.authbar button{border:0;border-radius:12px;padding:10px 13px;background:#eeeafd;color:#5145cd;font-weight:700}.authpill{margin:10px 18px;color:#666;font-size:13px}</style><style>
+/* KayDate visual refresh */
+:root{--kd:#6d5dfc;--kd2:#8b7cff;--ink:#141522;--soft:#f6f5ff}
+body{background:linear-gradient(180deg,#f7f7fb 0%,#eef0f8 100%);color:var(--ink)}
+.app{background:linear-gradient(180deg,#fff 0%,#fbfbfe 100%);box-shadow:0 0 50px rgba(25,25,50,.08)}
+.top{padding:20px 18px 12px;position:relative}
+.brand{letter-spacing:-1.2px;font-size:31px}.brand span{background:linear-gradient(90deg,#6d5dfc,#a05cff);-webkit-background-clip:text;color:transparent}
+.sub{font-size:13px;font-weight:600;color:#858596}
+.search{height:52px;border:1px solid #e7e5f2;background:#fff;box-shadow:0 8px 24px rgba(50,45,100,.07);transition:.2s}
+.search:focus{border-color:#b7afff;box-shadow:0 10px 28px rgba(109,93,252,.14)}
+.authbar button{background:#f0eeff;box-shadow:0 4px 12px rgba(109,93,252,.08)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#17152c 0%,#4031a2 52%,#7a5cff 100%);box-shadow:0 16px 35px rgba(66,48,170,.22);padding:26px 22px;min-height:178px}
+.hero:before{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-65px;top:-75px;background:rgba(255,255,255,.13)}
+.hero:after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;right:65px;bottom:-75px;background:rgba(255,255,255,.08)}
+.hero>*{position:relative;z-index:1}.hero h1{font-size:29px;letter-spacing:-.7px;max-width:330px}
+.hero p{font-size:14px;max-width:340px}
+.hero .btn{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(8px)}
+.row{padding:4px 0 14px;scrollbar-width:none}.row::-webkit-scrollbar{display:none}
+.chip{background:#fff;color:#555;border:1px solid #eceaf5;box-shadow:0 5px 14px rgba(30,30,60,.05);font-weight:700}.chip:first-child{background:#eeeaff;color:#5547d2;border-color:#ddd7ff}
+.section{margin:21px 0 11px}.section h2{letter-spacing:-.3px}
+.cards{gap:14px}
+.card{border:1px solid #ecebf3;border-radius:22px;padding:16px;background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(30,30,55,.06);transition:transform .18s,box-shadow .18s}
+.card:active{transform:scale(.985)}
+.card h3{font-size:18px;letter-spacing:-.25px}
+.meta{color:#7b7b89}
+.actions .btn{box-shadow:0 3px 9px rgba(30,30,60,.05);border:1px solid transparent}
+.save{background:#f0edff}.primary{background:linear-gradient(135deg,#6d5dfc,#8a6cff);box-shadow:0 8px 18px rgba(109,93,252,.22)!important}
+.add{background:linear-gradient(135deg,#6d5dfc,#9a67ff);box-shadow:0 12px 28px rgba(109,93,252,.34)}
+.nav{border-top:1px solid #ecebf3;box-shadow:0 -8px 25px rgba(20,20,40,.05);backdrop-filter:blur(16px);background:rgba(255,255,255,.92)}
+.nav button{font-weight:650}.nav b{font-size:19px}
+.nav .active{color:var(--kd)}
+.kd-inspire{display:grid;grid-template-columns:1.25fr .9fr;gap:10px;margin:2px 0 18px}
+.kd-tile{min-height:112px;border-radius:20px;padding:15px;color:#fff;position:relative;overflow:hidden;box-shadow:0 10px 25px rgba(30,30,60,.12)}
+.kd-tile:after{content:"";position:absolute;width:85px;height:85px;border-radius:50%;right:-25px;bottom:-28px;background:rgba(255,255,255,.14)}
+.kd-tile b,.kd-tile span{position:relative;z-index:1;display:block}.kd-tile b{font-size:17px;margin-bottom:5px}.kd-tile span{font-size:12px;opacity:.86}
+.kd-tile.one{background:linear-gradient(135deg,#ff7b72,#ffae58)}.kd-tile.two{background:linear-gradient(135deg,#1aa6a6,#5bd3b4)}
+.kd-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#8a8897;margin:4px 0 8px}
+@media(max-width:390px){.hero h1{font-size:25px}.kd-inspire{grid-template-columns:1fr}.kd-tile{min-height:92px}}
+</style></head>
 <body><div class="app">
 <header class="top"><div class="brand">Kay<span>Date</span> 📍</div><div class="sub">Keşfet. Kaydet. Planla. Git.</div></header>
 <input id="search" class="search" placeholder="Yer, şehir veya kategori ara…">
@@ -253,5 +291,28 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
       box.innerHTML='<div class="empty">Mekan detayları şu anda yüklenemedi.</div>';
     }
   };
+})();
+</script><script>
+(function(){
+ const content=document.getElementById("content");
+ const originalRender=window.render;
+ window.render=function(q=""){
+   originalRender(q);
+   const hero=content.querySelector(".hero");
+   if(!hero || content.querySelector(".kd-inspire")) return;
+   const block=document.createElement("div");
+   block.innerHTML='<div class="kd-label">Bugünün ilhamı</div><div class="kd-inspire"><div class="kd-tile one"><b>🌅 Gün batımı</b><span>Manzaralı yerleri keşfet</span></div><div class="kd-tile two"><b>☕ Kahve molası</b><span>Yakındaki kafelere bak</span></div></div>';
+   hero.insertAdjacentElement("afterend",block);
+ };
+ const oldProvider=window.showProviderResults;
+ if(oldProvider){
+   window.showProviderResults=function(list,q){
+     oldProvider(list,q);
+     const c=document.getElementById("content");
+     if(c && !c.querySelector(".kd-inspire")){
+       const s=c.querySelector(".hero"); if(s){const d=document.createElement("div");d.innerHTML='<div class="kd-label">Keşfetmeye devam et</div><div class="kd-inspire"><div class="kd-tile one"><b>✨ Popüler</b><span>Bugün öne çıkan mekanlar</span></div><div class="kd-tile two"><b>📍 Yakınında</b><span>Yeni yerler bul</span></div></div>';s.insertAdjacentElement("afterend",d);}
+     }
+   };
+ }
 })();
 </script></body></html>
