@@ -94,4 +94,108 @@ window.logout=async function(){await sb.auth.signOut();updateAuth()};
 window.syncPlaces=async function(){const {data:{user}}=await sb.auth.getUser();if(!user)return;for(const p of places){let {data:pl}=await sb.from("places").select("id").eq("name",p.name).eq("city",p.city||"").maybeSingle();if(!pl){const ins=await sb.from("places").insert({name:p.name,city:p.city||null,category:p.cat,source_url:p.url||null}).select("id").single();pl=ins.data}if(pl)await sb.from("saved_places").upsert({user_id:user.id,place_id:pl.id,status:p.done?"visited":"want",note:p.note||null},{onConflict:"user_id,place_id"});}};
 const oldAdd=window.addPlace;window.addPlace=async function(){oldAdd();setTimeout(syncPlaces,400)};
 updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
-</script></body></html>
+</script>
+<script>
+(function(){
+  let providerTimer=null;
+  let providerBusy=false;
+  const providerCache=new Map();
+
+  function getPosition(){
+    return new Promise(resolve=>{
+      if(!navigator.geolocation) return resolve(null);
+      navigator.geolocation.getCurrentPosition(
+        p=>resolve({lat:p.coords.latitude,lng:p.coords.longitude}),
+        ()=>resolve(null),
+        {enableHighAccuracy:false,timeout:5000,maximumAge:300000}
+      );
+    });
+  }
+
+  async function searchRealPlaces(){
+    const input=document.getElementById("search");
+    const q=(input?.value||"").trim();
+    if(q.length<2) return;
+    const key=q+"|"+(window.filter||"Tümü");
+    if(providerCache.has(key)){showProviderResults(providerCache.get(key),q);return;}
+    if(providerBusy)return;
+    providerBusy=true;
+    const pos=await getPosition();
+    try{
+      const body={query:q,radius:10000,category:window.filter==="Tümü"?"":window.filter};
+      if(pos){body.lat=pos.lat;body.lng=pos.lng;}
+      const {data,error}=await sb.functions.invoke("search-places",{body});
+      if(error) throw error;
+      const list=(data?.places||[]).slice(0,30);
+      providerCache.set(key,list);
+      showProviderResults(list,q);
+    }catch(e){
+      console.warn("Gerçek mekan araması:",e);
+      if(q.length>=2){
+        const msg=document.createElement("div");
+        msg.className="empty";
+        msg.textContent="Gerçek mekan araması şu anda kullanılamıyor. Yerel kayıtların gösteriliyor.";
+        const c=document.getElementById("content");
+        if(c) c.prepend(msg);
+      }
+    }finally{providerBusy=false;}
+  }
+
+  function providerCard(p,i){
+    const idx="provider_"+i;
+    window[idx]=p;
+    const rating=p.rating!=null?" · ⭐ "+p.rating:"";
+    const price=p.price!=null?" · "+"₺".repeat(Math.min(Number(p.price),4)):"";
+    return '<article class="card"><h3>'+esc(p.name)+'</h3>'+
+      '<div class="meta">📍 '+esc(p.address||p.city||"")+rating+price+'</div>'+
+      (p.category?'<div class="note">'+esc(p.category)+'</div>':'')+
+      '<div class="actions">'+
+      '<button class="btn save" onclick="saveProviderPlace('+i+')">❤️ Kaydet</button>'+
+      (p.latitude&&p.longitude?'<button class="btn light" onclick="location.href=\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.latitude+','+p.longitude)+'\'">🧭 Rota</button>':'')+
+      (p.website?'<button class="btn light" onclick="location.href=\''+p.website.replace(/'/g,"%27")+'\'">🌐 Web</button>':'')+
+      '</div></article>';
+  }
+
+  function showProviderResults(list,q){
+    const c=document.getElementById("content");
+    if(!c)return;
+    const local=window.places.filter(p=>(p.name+" "+(p.city||"")+" "+p.cat).toLowerCase().includes(q.toLowerCase()));
+    c.innerHTML='<section class="hero"><h1>📍 Gerçek mekanlar</h1><p>Foursquare üzerinden bulunan sonuçlar.</p></section>'+
+      '<div class="section"><h2>'+esc(q)+'</h2><span class="muted">'+list.length+' sonuç</span></div>'+
+      '<div class="cards">'+
+      (list.length?list.map(providerCard).join(""):'<div class="empty">Bu aramayla mekan bulunamadı.</div>')+
+      '</div>'+
+      (local.length?'<div class="section"><h2>❤️ Kaydettiklerin</h2></div><div class="cards">'+local.map(p=>card(p,window.places.indexOf(p))).join("")+'</div>':'');
+  }
+
+  window.saveProviderPlace=function(i){
+    const p=window["provider_"+i];
+    if(!p)return;
+    const exists=window.places.some(x=>x.external_id===p.external_id || (x.name===p.name && x.city===p.city));
+    if(exists){alert("Bu mekan zaten KayDate'te kayıtlı.");return;}
+    window.places.unshift({
+      name:p.name||"İsimsiz mekan",
+      city:p.city||p.address||"",
+      cat:p.category||"Diğer",
+      done:false,
+      note:p.rating!=null?"Foursquare puanı: "+p.rating:"",
+      url:p.website||"",
+      external_id:p.external_id||"",
+      provider:p.provider||"foursquare",
+      latitude:p.latitude,
+      longitude:p.longitude
+    });
+    save();
+    alert("Mekan KayDate'e kaydedildi ❤️");
+  };
+
+  const searchInput=document.getElementById("search");
+  if(searchInput){
+    searchInput.addEventListener("input",function(){
+      clearTimeout(providerTimer);
+      providerTimer=setTimeout(searchRealPlaces,550);
+    });
+  }
+})();
+</script>
+</body></html>
