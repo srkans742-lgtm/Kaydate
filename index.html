@@ -126,7 +126,7 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
       if(pos){body.lat=pos.lat;body.lng=pos.lng;}
       const {data,error}=await sb.functions.invoke("search-places",{body});
       if(error) throw error;
-      const list=(data?.places||[]).slice(0,30);
+      const list=(data?.places||[]).slice(0,50);
       providerCache.set(key,list);
       showProviderResults(list,q);
     }catch(e){
