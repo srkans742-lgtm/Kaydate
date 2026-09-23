@@ -23,7 +23,7 @@ main{padding:8px 18px 105px}.hero{background:#111827;color:#fff;border-radius:25
 <input id="search" class="search" placeholder="Yer, şehir veya kategori ara…">
 <div id="authbar" class="authbar"><button onclick="authOpen('login')">Giriş yap</button><button onclick="authOpen('signup')">Kayıt ol</button></div><div id="authpill" class="authpill"></div>
 <div id="authmodal" class="modal" onclick="if(event.target.id==='authmodal')authClose()"><div class="sheet"><h2 id="authtitle">KayDate hesabı</h2><input id="aemail" type="email" placeholder="E-posta"><input id="apass" type="password" placeholder="Şifre"><button class="primary" onclick="authSubmit()">Devam et</button><button class="btn light" style="width:100%;margin-top:8px" onclick="authClose()">Kapat</button></div></div><main id="content"></main><button class="add" onclick="openAdd()">+</button>
-<nav class="nav"><button class="active" onclick="show('home',this)"><b>⌂</b>Ana Sayfa</button><button onclick="show('map',this)"><b>🗺</b>Harita</button><button onclick="openAdd()"><b>＋</b>Kaydet</button><button onclick="show('map',this)"><b>🗺</b>Harita</button><button onclick="show('saved',this)"><b>♥</b>Listelerim</button><button onclick="show('profile',this)"><b>●</b>Profil</button></nav>
+<nav class="nav"><button class="active" onclick="show('home',this)"><b>⌂</b>Ana Sayfa</button><button onclick="show('map',this)"><b>🗺</b>Harita</button><button onclick="openAdd()"><b>＋</b>Kaydet</button><button onclick="show('saved',this)"><b>♥</b>Listelerim</button><button onclick="show('profile',this)"><b>●</b>Profil</button></nav>
 </div>
 
 <div id="modal" class="modal" onclick="if(event.target.id==='modal')closeAdd()"><div class="sheet">
@@ -46,7 +46,7 @@ function share(p){if(navigator.share)navigator.share({title:p.name,text:"KayDate
 function card(p,i){return '<article class="card"><h3>'+esc(p.name)+'</h3><div class="meta">📍 '+esc(p.city)+' · '+esc(p.cat)+(p.done?' · 🟢 Gidildi':'')+'</div>'+(p.note?'<div class="note">'+esc(p.note)+'</div>':'')+'<div class="actions"><button class="btn save" onclick="toggle('+i+')">'+(p.done?'↩️ Tekrar planla':'❤️ Gitmek istiyorum')+'</button><button class="btn light" onclick="maps(places['+i+'])">🧭 Rota</button><button class="btn light" onclick="share(places['+i+'])">↗️ Paylaş</button></div></article>'}
 function filtered(q=""){return places.filter(p=>(filter==="Tümü"||p.cat===filter)&&(p.name+" "+p.city+" "+p.cat+" "+p.note).toLowerCase().includes(q.toLowerCase()))}
 function render(q=""){let a=filtered(q);document.getElementById("content").innerHTML='<section class="hero"><h1>Bugün nereye gitmek istersin?</h1><p>Beğendiğin yerleri kaydet, planla ve git.</p><button class="btn" onclick="planner()" style="margin-top:14px">✨ Bana gezi planla</button></section><div class="row">'+["Tümü","Restoran","Kafe","Gezi","Doğa","Otel","Plaj"].map(x=>'<button class="chip" onclick="filterCat(\''+x+'\')">'+x+'</button>').join("")+'</div><div class="section"><h2>✨ Keşfet</h2><button class="btn primary" onclick="planner()">✨ Bana gezi planla</button></div><div class="cards">'+(a.map(card).join("")||'<div class="empty">Sonuç bulunamadı.</div>')+'</div>'}
-function filterCat(c){filter=c;render(document.getElementById("search").value)}
+function filterCat(c){filter=c;window.filter=c;render(document.getElementById("search").value);const q=document.getElementById("search").value.trim();if(q.length>=2)searchRealPlaces?.()}
 function toggle(i){places[i].done=!places[i].done;save();render(document.getElementById("search").value)}
 function show(t,el){document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");
 if(t==="home"){filter="Tümü";render()}
@@ -122,11 +122,11 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
     providerBusy=true;
     const pos=await getPosition();
     try{
-      const body={query:q,radius:10000,category:window.filter==="Tümü"?"":window.filter};
+      const body={query:q,radius:25000,category:window.filter==="Tümü"?"":window.filter};
       if(pos){body.lat=pos.lat;body.lng=pos.lng;}
       const {data,error}=await sb.functions.invoke("search-places",{body});
       if(error) throw error;
-      const list=(data?.places||[]).slice(0,50);
+      const list=(data?.places||[]).slice(0,100);
       providerCache.set(key,list);
       showProviderResults(list,q);
     }catch(e){
@@ -160,7 +160,7 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
     const c=document.getElementById("content");
     if(!c)return;
     const local=window.places.filter(p=>(p.name+" "+(p.city||"")+" "+p.cat).toLowerCase().includes(q.toLowerCase()));
-    c.innerHTML='<section class="hero"><h1>📍 Gerçek mekanlar</h1><p>Foursquare üzerinden bulunan sonuçlar.</p></section>'+
+    c.innerHTML='<section class="hero"><h1>📍 Gerçek mekanlar</h1><p>Foursquare üzerinden gerçek mekanlar. Şehir + kategori aramalarında daha geniş sonuç taraması yapılır.</p></section>'+
       '<div class="section"><h2>'+esc(q)+'</h2><span class="muted">'+list.length+' sonuç</span></div>'+
       '<div class="cards">'+
       (list.length?list.map(providerCard).join(""):'<div class="empty">Bu aramayla mekan bulunamadı.</div>')+
@@ -186,9 +186,12 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
       longitude:p.longitude
     });
     save();
+    if(window.syncPlaces) window.syncPlaces().catch(()=>{});
     alert("Mekan KayDate'e kaydedildi ❤️");
   };
 
+  window.searchRealPlaces=searchRealPlaces;
+  window.filter=window.filter||"Tümü";
   const searchInput=document.getElementById("search");
   if(searchInput){
     searchInput.addEventListener("input",function(){
