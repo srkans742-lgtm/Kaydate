@@ -145,9 +145,9 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
     const idx="provider_"+i;
     window[idx]=p;
     const rating=p.rating!=null?" · ⭐ "+p.rating:"";
-    const price=p.price!=null?" · "+"₺".repeat(Math.min(Number(p.price),4)):"";
+    const price=p.price!=null?" · "+"₺".repeat(Math.min(Number(p.price),4)):""; const open=p.open_now===true?" · 🟢 Açık":(p.open_now===false?" · 🔴 Kapalı":"");
     return '<article class="card"><h3>'+esc(p.name)+'</h3>'+
-      '<div class="meta">📍 '+esc(p.address||p.city||"")+rating+price+'</div>'+
+      '<div class="meta">📍 '+esc(p.address||p.city||"")+rating+price+open+'</div>'+
       (p.category?'<div class="note">'+esc(p.category)+'</div>':'')+
       '<div class="actions">'+
       '<button class="btn save" onclick="saveProviderPlace('+i+')">❤️ Kaydet</button>'+
