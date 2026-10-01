@@ -76,7 +76,7 @@ body{background:linear-gradient(180deg,#f7f7fb 0%,#eef0f8 100%);color:var(--ink)
 <header class="top"><div class="brand">Kay<span>Date</span> 📍</div><div class="sub">Keşfet. Kaydet. Planla. Git.</div></header>
 <div class="search-wrap"><svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 5 5"></path></svg><input id="search" class="search" placeholder="Yer, şehir veya kategori ara…" aria-label="Yer, şehir veya kategori ara"></div>
 <div id="authbar" class="authbar"><button onclick="authOpen('login')">Giriş yap</button><button onclick="authOpen('signup')">Kayıt ol</button></div><div id="authpill" class="authpill"></div>
-<div id="authmodal" class="modal" onclick="if(event.target.id==='authmodal')authClose()"><div class="sheet"><h2 id="authtitle">KayDate hesabı</h2><input id="aemail" type="email" placeholder="E-posta"><input id="apass" type="password" placeholder="Şifre"><button class="primary" onclick="authSubmit()">Devam et</button><button class="btn light" style="width:100%;margin-top:8px" onclick="authClose()">Kapat</button></div></div><main id="content"></main><button class="add" onclick="openAdd()">+</button>
+<div id="authmodal" class="modal" onclick="if(event.target.id==='authmodal')authClose()"><div class="sheet"><h2 id="authtitle">KayDate hesabı</h2><input id="aemail" type="email" placeholder="E-posta"><input id="apass" type="password" placeholder="Şifre"><input id="aphone" type="tel" placeholder="Telefon (+90 5xx xxx xx xx)" style="display:none"><button class="primary" onclick="authSubmit()">Devam et</button><div id="quickAuth" style="margin-top:14px"><div style="text-align:center;color:#888;font-size:12px;margin-bottom:8px">veya kolay kaydol</div><div class="actions"><button class="btn light" style="flex:1" onclick="socialAuth('google')">🟢 Google</button><button class="btn light" style="flex:1" onclick="socialAuth('facebook')">🔵 Facebook</button><button class="btn light" style="flex:1" onclick="phoneAuthStart()">📱 Cep no</button></div><button class="btn light" style="width:100%;margin-top:8px" onclick="instagramInfo()">📸 Instagram</button></div><button class="btn light" style="width:100%;margin-top:8px" onclick="authClose()">Kapat</button></div></div><main id="content"></main><button class="add" onclick="openAdd()">+</button>
 <nav class="nav"><button class="active" onclick="show('home',this)"><b>⌂</b>Ana Sayfa</button><button onclick="show('map',this)" aria-label="Harita"><b class="google-pin map-pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5a7 7 0 0 0-7 7c0 5.2 7 12 7 12s7-6.8 7-12a7 7 0 0 0-7-7Zm0 9.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z"/></svg></b>Harita</button><button onclick="openAdd()" aria-label="Kaydet"><b>📍</b>Kaydet</button><style>.google-pin{display:block;width:21px;height:21px}.google-pin svg{width:21px;height:21px;display:block;fill:#4285F4}.google-pin svg path{fill:#4285F4}.nav button:nth-child(2) .google-pin svg{fill:#4285F4}</style><button onclick="show('saved',this)"><b>♥</b>Listelerim</button><button onclick="show('profile',this)"><b>●</b>Profil</button></nav>
 </div>
 
@@ -135,19 +135,36 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 (function(){
 const esc2=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 window.esc=esc2;
-window.render=function(q=""){const activeFilter=window.filter||"Tümü";const a=window.places.filter(p=>(activeFilter==="Tümü"||p.cat===activeFilter)&&(p.name+" "+(p.city||"")+" "+p.cat+" "+(p.note||"")).toLowerCase().includes(q.toLowerCase()));document.getElementById("content").innerHTML='<section class="hero"><h1>Bugün nereye gitmek istersin?</h1><p>Beğendiğin yerleri kaydet, planla ve git.</p><button class="btn" onclick="planner()" style="margin-top:14px">✨ Bana gezi planla</button></section><div class="row">'+["Tümü","Restoran","Kafe","Gezi","Doğa","Otel","Plaj"].map(x=>'<button class="chip" onclick="filterCat(\''+x+'\')">'+x+'</button>').join("")+'</div><div class="section"><h2>✨ Keşfet</h2></div><div class="cards">'+(a.map(card).join("")||'<div class="empty">Sonuç bulunamadı.</div>')+'</div>';};
-window.toggle=function(i){window.places[i].done=!window.places[i].done;save();render(document.getElementById("search").value);};
-window.filterCat=function(cat){if(cat==="Tümü"){render(document.getElementById("search").value);return;}const a=window.places.filter(p=>p.cat===cat);document.getElementById("content").innerHTML='<div class="section"><h2>'+esc(cat)+'</h2></div><div class="cards">'+a.map((p,i)=>card(p,window.places.indexOf(p))).join("")+'</div>';};
-render();
-})();
-</script><script>
-let authMode="login";
-window.authOpen=function(m){authMode=m;document.getElementById("authtitle").textContent=m==="login"?"KayDate'e giriş":"KayDate'e kayıt ol";document.getElementById("authmodal").style.display="flex"};
-window.authClose=function(){document.getElementById("authmodal").style.display="none"};
-window.authSubmit=async function(){const email=document.getElementById("aemail").value.trim(),password=document.getElementById("apass").value;if(!email||password.length<6)return alert("E-posta ve en az 6 karakter şifre gerekli.");const r=authMode==="login"?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password});if(r.error)return alert(r.error.message);authClose();updateAuth()};
-window.updateAuth=async function(){const {data}=await sb.auth.getUser();const b=document.getElementById("authbar"),p=document.getElementById("authpill");if(data.user){b.innerHTML='<button onclick="logout()">Çıkış yap</button>';p.textContent="☁️ Buluta bağlı: "+data.user.email}else{p.textContent="Cihazda çalışan misafir modu aktif."}};
-window.logout=async function(){await sb.auth.signOut();updateAuth()};
-window.syncPlaces=async function(){const {data:{user}}=await sb.auth.getUser();if(!user)return;for(const p of places){let {data:pl}=await sb.from("places").select("id").eq("name",p.name).eq("city",p.city||"").maybeSingle();if(!pl){const ins=await sb.from("places").insert({name:p.name,city:p.city||null,category:p.cat,description:p.note||null,address:p.address||null,latitude:Number.isFinite(Number(p.latitude))?Number(p.latitude):null,longitude:Number.isFinite(Number(p.longitude))?Number(p.longitude):null,maps_url:p.latitude&&p.longitude?"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.latitude+","+p.longitude):null,source_url:p.url||null,cover_url:p.photo||null}).select("id").single();pl=ins.data}else{await sb.from("places").update({category:p.cat,description:p.note||null,address:p.address||null,latitude:Number.isFinite(Number(p.latitude))?Number(p.latitude):null,longitude:Number.isFinite(Number(p.longitude))?Number(p.longitude):null,source_url:p.url||null,cover_url:p.photo||null}).eq("id",pl.id);}if(pl)await sb.from("saved_places").upsert({user_id:user.id,place_id:pl.id,status:p.done?"visited":"want",note:p.note||null},{onConflict:"user_id,place_id"});}};
+window.render=function(q=""){const activeFilter=window.filter||"Tümü";const a=window.places.filter(p=>(activeFilter==="Tümü"||p.cat===activeFilter)&&(p.name+" "+(p.city||"")+" "+p.cat+" "+(p.note||"")).toLowerCase().includes(q.toLowerCase()));document.getElementById("content").innerHTML='<section class="hero"><h1>Bugün nereye gitmek istersin?</h1><p>Beğendiğin yerleri kaydet, planla ve git.</p><button class="btn" onclick="planner()" style="margin-top:14px">✨ Bana gezi planla</button></section><div class="row">'+["Tümü","Restoran","Kafe","Gezi","Doğa","Otel","Plaj"].map(x=>'<button class="chip" onclick="filterCat(\''+x+'\')">'+x+'</button>').join("")+'</let authMode="login";
+window.authOpen=function(m){authMode=m;document.getElementById("authtitle").textContent=m==="login"?"KayDate'e giriş":"KayDate'e kayıt ol";document.getElementById("authmodal").style.display="flex";document.getElementById("quickAuth").style.display=m==="signup"?"block":"none";document.getElementById("aphone").style.display="none";};
+window.authClose=function(){document.getElementById("authmodal").style.display="none";};
+window.authSubmit=async function(){
+ const email=document.getElementById("aemail").value.trim(),password=document.getElementById("apass").value;
+ if(!email||password.length<6)return alert("E-posta ve en az 6 karakter şifre gerekli.");
+ const r=authMode==="login"?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password});
+ if(r.error)return alert(r.error.message);
+ authClose();updateAuth();
+};
+window.socialAuth=async function(provider){
+ const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:location.origin+location.pathname}});
+ if(error)alert(error.message);
+};
+window.phoneAuthStart=async function(){
+ const phone=prompt("Cep telefonu numaranı ülke koduyla gir (+90...):");
+ if(!phone)return;
+ const {error}=await sb.auth.signInWithOtp({phone});
+ if(error)return alert(error.message);
+ const code=prompt("SMS ile gelen 6 haneli kodu gir:");
+ if(!code)return;
+ const r=await sb.auth.verifyOtp({phone,token:code,type:"sms"});
+ if(r.error)return alert(r.error.message);
+ authClose();updateAuth();
+};
+window.instagramInfo=function(){
+ alert("Instagram ile doğrudan giriş Supabase'in yerleşik sosyal sağlayıcıları arasında yok. Instagram'ı sahte giriş olarak göstermiyoruz. Meta/Instagram OAuth kurulumu için özel OAuth/OIDC sağlayıcısı yapılandırılabilir.");
+};
+window.updateAuth=async function(){const {data}=await sb.auth.getUser();const b=document.getElementById("authbar"),p=document.getElementById("authpill");if(data.user){b.innerHTML='<button onclick="logout()">Çıkış yap</button>';p.textContent="☁️ Buluta bağlı: "+(data.user.email||data.user.phone||"hesap")}else{p.textContent="Cihazda çalışan misafir modu aktif."}};
+window.logout=async function(){await sb.auth.signOut();updateAuth()};gle();pl=ins.data}else{await sb.from("places").update({category:p.cat,description:p.note||null,address:p.address||null,latitude:Number.isFinite(Number(p.latitude))?Number(p.latitude):null,longitude:Number.isFinite(Number(p.longitude))?Number(p.longitude):null,source_url:p.url||null,cover_url:p.photo||null}).eq("id",pl.id);}if(pl)await sb.from("saved_places").upsert({user_id:user.id,place_id:pl.id,status:p.done?"visited":"want",note:p.note||null},{onConflict:"user_id,place_id"});}};
 const oldAdd=window.addPlace;window.addPlace=async function(){oldAdd();setTimeout(syncPlaces,400)};
 updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
 </script>
