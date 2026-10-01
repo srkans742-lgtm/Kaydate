@@ -347,4 +347,82 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
  }
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",incomingShare);else incomingShare();
 })();
+</script>
+<script>
+(function(){
+  const leafletCss="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  const leafletJs="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  let leafletPromise=null;
+  function loadLeaflet(){
+    if(window.L)return Promise.resolve(window.L);
+    if(leafletPromise)return leafletPromise;
+    leafletPromise=new Promise((resolve,reject)=>{
+      if(!document.querySelector('link[data-kd-leaflet]')){
+        const link=document.createElement("link");link.rel="stylesheet";link.href=leafletCss;link.dataset.kdLeaflet="1";document.head.appendChild(link);
+      }
+      const s=document.createElement("script");s.src=leafletJs;s.onload=()=>resolve(window.L);s.onerror=reject;document.head.appendChild(s);
+    });
+    return leafletPromise;
+  }
+  async function renderRealMap(){
+    const c=document.getElementById("content"); if(!c)return;
+    let box=document.getElementById("kd-real-map");
+    if(!box){
+      box=document.createElement("div");box.id="kd-real-map";
+      box.style="height:390px;border-radius:20px;overflow:hidden;margin:14px 18px;background:#eef0f4;box-shadow:0 8px 24px rgba(0,0,0,.08)";
+      const hero=c.querySelector(".hero"); if(hero) hero.insertAdjacentElement("afterend",box); else c.prepend(box);
+    }
+    box.innerHTML='<div style="padding:20px">🗺️ Harita yükleniyor…</div>';
+    try{
+      const L=await loadLeaflet();
+      const points=window.places.filter(p=>Number.isFinite(Number(p.latitude))&&Number.isFinite(Number(p.longitude)));
+      let center=points.length?[Number(points[0].latitude),Number(points[0].longitude)]:[39.0,35.0];
+      const map=L.map(box).setView(center,points.length?11:6);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap katkıcıları"}).addTo(map);
+      const markers=[];
+      points.forEach((p,i)=>{
+        const m=L.marker([Number(p.latitude),Number(p.longitude)]).addTo(map);
+        m.bindPopup("<b>"+esc(p.name)+"</b><br>"+esc(p.city||"")+"<br><button onclick='maps(window.places["+window.places.indexOf(p)+"])'>🧭 Google Maps</button>");
+        markers.push(m);
+      });
+      if(points.length>1){
+        const group=L.featureGroup(markers);map.fitBounds(group.getBounds().pad(.18));
+      }
+      setTimeout(()=>map.invalidateSize(),120);
+      if(!points.length){
+        box.insertAdjacentHTML("beforeend",'<div style="position:absolute;z-index:1000;margin:12px;padding:10px 12px;background:white;border-radius:12px">Koordinatlı kayıt ekledikçe burada görünecek.</div>');
+      }
+    }catch(e){
+      console.warn("KayDate harita:",e);
+      box.innerHTML='<div style="padding:20px">Harita yüklenemedi. Mekânları aşağıdaki listeden açabilirsin.</div>';
+    }
+  }
+
+  const oldShow=window.show;
+  window.show=function(t,el){
+    oldShow(t,el);
+    if(t==="map") setTimeout(renderRealMap,80);
+  };
+
+  const oldPlanner=window.planner;
+  window.planner=async function(){
+    const want=window.places.filter(p=>!p.done).slice(0,12);
+    const c=document.getElementById("content");
+    if(!c)return;
+    c.innerHTML='<section class="hero"><h1>✨ Gezi planın</h1><p>Yapay zekâ kaydettiğin yerler arasında bir rota oluşturuyor…</p></section><div class="card"><div class="empty">🤖 Plan hazırlanıyor…</div></div>';
+    if(!want.length){oldPlanner();return;}
+    try{
+      const {data,error}=await sb.functions.invoke("plan-trip",{
+        body:{places:want,request:"Kaydettiğim yerlerden pratik ve dengeli bir gezi planı oluştur. Yerleri birbirine yakınlık, kategori çeşitliliği ve gün içindeki mantıklı sıraya göre grupla. Türkçe yaz; kısa ve uygulanabilir olsun."}
+      });
+      if(error)throw error;
+      const text=data?.text||"";
+      if(!text)throw new Error("Boş plan");
+      c.innerHTML='<section class="hero"><h1>✨ AI gezi planın</h1><p>Kaydettiğin yerlere göre hazırlandı.</p></section><div class="card" style="white-space:pre-line;line-height:1.8">'+esc(text)+'</div><div class="actions"><button class="btn primary" onclick="share({name:\'KayDate AI gezi planım\',city:\'\',url:location.href})">↗️ Planı paylaş</button></div>';
+    }catch(e){
+      console.warn("AI planlayıcı:",e);
+      oldPlanner();
+    }
+  };
+})();
 </script></body></html>
