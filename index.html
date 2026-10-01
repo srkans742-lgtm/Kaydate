@@ -326,30 +326,64 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
 })();
 </script><script>
 (function(){
- function incomingShare(){
+ async function incomingShare(){
   const p=new URLSearchParams(location.search);
   const title=(p.get("title")||"").trim();
   const text=(p.get("text")||"").trim();
   const url=(p.get("url")||"").trim();
   if(!title&&!text&&!url)return;
+
   const cleanUrl=url||((text.match(/https?:\/\/[^\s]+/i)||[])[0]||"");
   const note=text.replace(cleanUrl,"").trim();
-  const name=(title&&title.length>2)?title:"Paylaşılan yer";
-  const n=document.getElementById("name"),c=document.getElementById("city"),cat=document.getElementById("cat"),nt=document.getElementById("note"),u=document.getElementById("url");
-  if(n)n.value=name;
-  if(c)c.value="";
-  if(cat)cat.value="Diğer";
-  if(nt)nt.value=note||"Sosyal medyadan paylaşıldı";
-  if(u)u.value=cleanUrl;
+  const rawName=(title&&title.length>2)?title:"Paylaşılan yer";
   const nameKey=(title+" "+text).toLowerCase();
   const inferredCat=/restaurant|restoran|yemek|food|cafe|kahve|coffee|brunch|bar/i.test(nameKey)?"Restoran":/hotel|otel|resort/i.test(nameKey)?"Otel":/beach|plaj|sahil/i.test(nameKey)?"Plaj":/park|doğa|nature|forest|orman/i.test(nameKey)?"Doğa":"Diğer";
-  const cleanName=name&&name!=="Paylaşılan yer"?name:"Paylaşılan yer";
-  const duplicate=window.places.some(x=>(cleanUrl&&x.url===cleanUrl)||(cleanName!=="Paylaşılan yer"&&x.name===cleanName));
+  const isGoogleMaps=/google\.[^/]+\/maps|maps\.google\./i.test(cleanUrl);
+  const isMapsLink=/maps/i.test(cleanUrl);
+  const looksLikePlaceName=rawName!=="Paylaşılan yer" && rawName.length>=3 && rawName.length<=100;
+  let resolved=null;
+
+  // Google Maps paylaşımında başlık çoğunlukla gerçek mekân adıdır.
+  // Önce gerçek yer sağlayıcısında eşleştirmeyi deniyoruz; başarısız olursa bağlantıyı yine kaydediyoruz.
+  if(looksLikePlaceName && (isGoogleMaps||isMapsLink)){
+    try{
+      const {data,error}=await sb.functions.invoke("search-places",{
+        body:{query:rawName,radius:50000}
+      });
+      if(!error && data?.places?.length){
+        const candidates=data.places;
+        const exact=candidates.find(x=>String(x.name||"").toLowerCase()===rawName.toLowerCase());
+        resolved=exact||candidates[0];
+      }
+    }catch(e){console.warn("Paylaşım mekan eşleştirme:",e);}
+  }
+
+  const cleanName=resolved?.name||rawName;
+  const duplicate=window.places.some(x=>
+    (cleanUrl&&x.url===cleanUrl) ||
+    (resolved?.external_id&&x.external_id===resolved.external_id) ||
+    (cleanName!=="Paylaşılan yer"&&x.name===cleanName&&(!x.city||x.city===resolved?.city))
+  );
+
   if(!duplicate){
-    window.places.unshift({name:cleanName,city:"",cat:inferredCat,done:false,note:note||"Sosyal medyadan kaydedildi",url:cleanUrl,source:"share"});
+    window.places.unshift({
+      name:cleanName,
+      city:resolved?.city||"",
+      cat:resolved?.category||inferredCat,
+      done:false,
+      note:note||"Sosyal medyadan kaydedildi",
+      url:cleanUrl||resolved?.website||"",
+      source:"share",
+      external_id:resolved?.external_id||"",
+      provider:resolved?.provider||"",
+      latitude:resolved?.latitude,
+      longitude:resolved?.longitude,
+      address:resolved?.address||""
+    });
     save();
     if(window.syncPlaces)window.syncPlaces().catch(()=>{});
   }
+
   const modal=document.getElementById("modal");
   if(modal)modal.style.display="none";
   const content=document.getElementById("content");
@@ -357,7 +391,7 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
     const toast=document.createElement("div");
     toast.className="card";
     toast.style="position:fixed;left:18px;right:18px;bottom:92px;z-index:30;background:#17152c;color:#fff;border:0";
-    toast.innerHTML="<b>❤️ KayDate'e kaydedildi</b><div style='margin-top:4px;opacity:.8'>"+esc(cleanName)+"</div>";
+    toast.innerHTML="<b>❤️ KayDate'e kaydedildi</b><div style='margin-top:4px;opacity:.8'>"+esc(cleanName)+(resolved?" · 📍 Mekân bulundu":" · 🔗 Bağlantı kaydedildi")+"</div>";
     document.body.appendChild(toast);
     setTimeout(()=>toast.remove(),3200);
   }
