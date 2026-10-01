@@ -118,8 +118,10 @@ render();
 (function(){
 const oldSave=window.save;
 window.save=function(){localStorage.setItem("kaydate-v3",JSON.stringify(window.places));};
-window.places=JSON.parse(localStorage.getItem("kaydate-v3")||"null")||window.places||[];
-if(!window.places.length){window.places=[{name:"Zeugma Mozaik Müzesi",city:"Gaziantep",cat:"Gezi",done:false,note:"",url:""},{name:"Karaköy",city:"İstanbul",cat:"Gezi",done:false,note:"",url:""}];window.save();}
+const storedPlaces=JSON.parse(localStorage.getItem("kaydate-v3")||"null");
+if(Array.isArray(storedPlaces)&&storedPlaces.length){places.splice(0,places.length,...storedPlaces);}
+else if(!places.length){places.push({name:"Zeugma Mozaik Müzesi",city:"Gaziantep",cat:"Gezi",done:false,note:"",url:""},{name:"Karaköy",city:"İstanbul",cat:"Gezi",done:false,note:"",url:""});window.save();}
+window.places=places;
 window.maps=function(p){location.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.name+" "+p.city)};
 window.share=function(p){const u=p.url||location.href; if(navigator.share) navigator.share({title:p.name,text:"KayDate: "+p.name+" — "+p.city,url:u}); else navigator.clipboard?.writeText(u).then(()=>alert("Bağlantı kopyalandı."));};
 window.card=function(p,i){return '<article class="card">'+(p.photo?'<img src="'+p.photo+'" style="width:100%;height:170px;object-fit:cover;border-radius:14px;margin-bottom:10px">':'')+'<h3>'+esc(p.name)+'</h3><div class="meta">📍 '+esc(p.city||"")+' · '+esc(p.cat)+(p.done?' · 🟢 Gidildi':'')+'</div>'+(p.note?'<div style="margin-top:8px;color:#555">'+esc(p.note)+'</div>':'')+'<div class="actions"><button class="btn save" onclick="toggle('+i+')">'+(p.done?'↩️ Tekrar planla':'❤️ Gitmek istiyorum')+'</button><button class="btn" onclick="maps(places['+i+'])">🧭 Rota</button><button class="btn" onclick="share(places['+i+'])">↗️ Paylaş</button></div></article>';};
@@ -133,7 +135,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 (function(){
 const esc2=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 window.esc=esc2;
-window.render=function(q=""){const a=window.places.filter(p=>(p.name+" "+(p.city||"")+" "+p.cat+" "+(p.note||"")).toLowerCase().includes(q.toLowerCase()));document.getElementById("content").innerHTML='<section class="hero"><h1>Bugün nereye gitmek istersin?</h1><p>Beğendiğin yerleri kaydet, planla ve git.</p><button class="btn" onclick="planner()" style="margin-top:14px">✨ Bana gezi planla</button></section><div class="row">'+["Tümü","Restoran","Kafe","Gezi","Doğa","Otel","Plaj"].map(x=>'<button class="chip" onclick="filterCat(\''+x+'\')">'+x+'</button>').join("")+'</div><div class="section"><h2>✨ Keşfet</h2></div><div class="cards">'+(a.map(card).join("")||'<div class="empty">Sonuç bulunamadı.</div>')+'</div>';};
+window.render=function(q=""){const activeFilter=window.filter||"Tümü";const a=window.places.filter(p=>(activeFilter==="Tümü"||p.cat===activeFilter)&&(p.name+" "+(p.city||"")+" "+p.cat+" "+(p.note||"")).toLowerCase().includes(q.toLowerCase()));document.getElementById("content").innerHTML='<section class="hero"><h1>Bugün nereye gitmek istersin?</h1><p>Beğendiğin yerleri kaydet, planla ve git.</p><button class="btn" onclick="planner()" style="margin-top:14px">✨ Bana gezi planla</button></section><div class="row">'+["Tümü","Restoran","Kafe","Gezi","Doğa","Otel","Plaj"].map(x=>'<button class="chip" onclick="filterCat(\''+x+'\')">'+x+'</button>').join("")+'</div><div class="section"><h2>✨ Keşfet</h2></div><div class="cards">'+(a.map(card).join("")||'<div class="empty">Sonuç bulunamadı.</div>')+'</div>';};
 window.toggle=function(i){window.places[i].done=!window.places[i].done;save();render(document.getElementById("search").value);};
 window.filterCat=function(cat){if(cat==="Tümü"){render(document.getElementById("search").value);return;}const a=window.places.filter(p=>p.cat===cat);document.getElementById("content").innerHTML='<div class="section"><h2>'+esc(cat)+'</h2></div><div class="cards">'+a.map((p,i)=>card(p,window.places.indexOf(p))).join("")+'</div>';};
 render();
