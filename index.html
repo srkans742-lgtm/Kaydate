@@ -425,4 +425,33 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
     }
   };
 })();
+</script>
+<script>
+(function(){
+  window.loadCloudPlaces=async function(){
+    try{
+      const {data:{user}}=await sb.auth.getUser();
+      if(!user)return;
+      const {data,error}=await sb.from("saved_places").select("status,note,visit_date,rating,places(*)").eq("user_id",user.id);
+      if(error)throw error;
+      let changed=false;
+      (data||[]).forEach(row=>{
+        const p=row.places;if(!p)return;
+        const exists=window.places.some(x=>(x.external_id&&p.external_id&&x.external_id===p.external_id)||(x.name===p.name&&x.city===(p.city||"")));
+        if(!exists){
+          window.places.push({name:p.name||"İsimsiz mekan",city:p.city||"",cat:p.category||"Diğer",done:row.status==="visited",note:row.note||"",url:p.source_url||p.maps_url||"",photo:p.cover_url||"",latitude:p.latitude,longitude:p.longitude});
+          changed=true;
+        }
+      });
+      if(changed){save();render();}
+    }catch(e){console.warn("KayDate bulut senkronizasyonu:",e);}
+  };
+  const oldUpdateAuth=window.updateAuth;
+  window.updateAuth=async function(){
+    await oldUpdateAuth();
+    const {data:{user}}=await sb.auth.getUser();
+    if(user) window.loadCloudPlaces();
+  };
+  window.loadCloudPlaces();
+})();
 </script></body></html>
