@@ -76,7 +76,7 @@ body{background:linear-gradient(180deg,#f7f7fb 0%,#eef0f8 100%);color:var(--ink)
 <header class="top"><div class="brand">Kay<span>Date</span> 📍</div><div class="sub">Keşfet. Kaydet. Planla. Git.</div></header>
 <div class="search-wrap"><svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 5 5"></path></svg><input id="search" class="search" placeholder="Yer, şehir veya kategori ara…" aria-label="Yer, şehir veya kategori ara"></div>
 <div id="authbar" class="authbar"><button onclick="authOpen('login')">Giriş yap</button><button onclick="authOpen('signup')">Kayıt ol</button></div><div id="authpill" class="authpill"></div>
-<div id="authmodal" class="modal" onclick="if(event.target.id==='authmodal')authClose()"><div class="sheet"><h2 id="authtitle">KayDate hesabı</h2><input id="aemail" type="email" placeholder="E-posta"><input id="apass" type="password" placeholder="Şifre"><button class="primary" onclick="authSubmit()">Devam et</button><button class="btn light" style="width:100%;margin-top:8px" onclick="authClose()">Kapat</button></div></div><main id="content"></main><button class="add" onclick="openAdd()">+</button>
+<div id="authmodal" class="modal" onclick="if(event.target.id==='authmodal')authClose()"><div class="sheet"><h2 id="authtitle">KayDate hesabı</h2><input id="aemail" type="email" placeholder="E-posta"><input id="apass" type="password" placeholder="Şifre"><input id="aphone" type="tel" placeholder="Telefon (+90 5xx xxx xx xx)" style="display:none"><button class="primary" onclick="authSubmit()">Devam et</button><div id="quickAuth" style="margin-top:14px"><div style="text-align:center;color:#888;font-size:12px;margin-bottom:8px">veya kolay kaydol</div><div class="actions"><button class="btn light" style="flex:1" onclick="socialAuth('google')">🟢 Google</button><button class="btn light" style="flex:1" onclick="socialAuth('facebook')">🔵 Facebook</button><button class="btn light" style="flex:1" onclick="phoneAuthStart()">📱 Cep no</button></div><button class="btn light" style="width:100%;margin-top:8px" onclick="instagramInfo()">📸 Instagram</button></div><button class="btn light" style="width:100%;margin-top:8px" onclick="authClose()">Kapat</button></div></div><main id="content"></main><button class="add" onclick="openAdd()">+</button>
 <nav class="nav"><button class="active" onclick="show('home',this)"><b>⌂</b>Ana Sayfa</button><button onclick="show('map',this)" aria-label="Harita"><b class="google-pin map-pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5a7 7 0 0 0-7 7c0 5.2 7 12 7 12s7-6.8 7-12a7 7 0 0 0-7-7Zm0 9.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z"/></svg></b>Harita</button><button onclick="openAdd()" aria-label="Kaydet"><b>📍</b>Kaydet</button><style>.google-pin{display:block;width:21px;height:21px}.google-pin svg{width:21px;height:21px;display:block;fill:#4285F4}.google-pin svg path{fill:#4285F4}.nav button:nth-child(2) .google-pin svg{fill:#4285F4}</style><button onclick="show('saved',this)"><b>♥</b>Listelerim</button><button onclick="show('profile',this)"><b>●</b>Profil</button></nav>
 </div>
 
@@ -106,7 +106,7 @@ function show(t,el){document.querySelectorAll(".nav button").forEach(x=>x.classL
 if(t==="home"){filter="Tümü";render()}
 if(t==="saved"){let a=places.filter(p=>!p.done);document.getElementById("content").innerHTML='<div class="section"><h2>❤️ Gitmek İstediklerim</h2></div><div class="cards">'+(a.map(card).join("")||'<div class="empty">Henüz yer kaydetmedin.</div>')+'</div><div class="section"><h2>🟢 Gittiklerim</h2></div><div class="cards">'+places.filter(p=>p.done).map(card).join("")+'</div>'}
 if(t==="map"){let q=places.map(p=>p.name+" "+p.city).join("|");document.getElementById("content").innerHTML='<section class="hero"><h1>🗺️ Haritam</h1><p>Kaydettiğin yerleri Google Maps üzerinde aç.</p></section><div class="cards">'+places.map((p,i)=>'<article class="card"><h3>'+esc(p.name)+'</h3><div class="meta">📍 '+esc(p.city)+'</div><div class="actions"><button class="btn primary" onclick="maps(places['+i+'])">🧭 Haritada aç</button></div></article>').join("")+'</div>'}
-if(t==="profile"){let done=places.filter(p=>p.done).length;document.getElementById("content").innerHTML='<section class="hero"><h1>👤 Profil</h1><p>KayDate maceran</p></section><div class="stats"><div class="stat"><b>'+places.length+'</b>Kaydedilen</div><div class="stat"><b>'+done+'</b>Gidilen</div><div class="stat"><b>'+Math.max(0,places.length-done)+'</b>Plan</div></div><div class="section"><h2>🔗 Linkten kaydet</h2></div><div class="card"><p class="muted">Instagram, TikTok veya Google Maps linkini aşağıya yapıştır; KayDate linki kaydeder ve daha sonra açmana izin verir.</p><input id="importLink" class="search" style="margin:8px 0;width:100%" placeholder="https://…"><button class="btn primary" onclick="importLink()">Bağlantıyı kaydet</button></div>}}
+if(t==="profile"){let done=places.filter(p=>p.done).length;document.getElementById("content").innerHTML='<section class="hero"><h1>👤 Profil</h1><p>KayDate maceran</p></section><div class="stats"><div class="stat"><b>'+places.length+'</b>Kaydedilen</div><div class="stat"><b>'+done+'</b>Gidilen</div><div class="stat"><b>'+Math.max(0,places.length-done)+'</b>Plan</div></div><div class="section"><h2>🔗 Linkten kaydet</h2></div><div class="card"><h3>🎯 Bugün ne yapalım?</h3><p class="muted">Kaydettiğin yerleri, ziyaret durumunu ve mekân türlerini değerlendirip sana bugün için seçenek çıkaralım.</p><button class="btn primary" onclick="todayPick()">✨ Bana bir yer seç</button></div><div class="card"><h3>🧠 KayDate Hafızası</h3><p class="muted">Kaydettiğin yerler zamanla senin kişisel keşif hafızana dönüşür. Notların ve ziyaretlerin önerileri kişiselleştirir.</p></div><div class="section"><h2>🔗 Linkten kaydet</h2></div><div class="card"><p class="muted">Instagram, TikTok veya Google Maps linkini aşağıya yapıştır; KayDate linki kaydeder ve daha sonra açmana izin verir.</p><input id="importLink" class="search" style="margin:8px 0;width:100%" placeholder="https://…"><button class="btn primary" onclick="importLink()">Bağlantıyı kaydet</button></div><div class="section"><h2>📍 Yaklaşınca haber ver</h2></div><div class="card"><p class="muted">Kaydettiğin koordinatlı bir mekâna yaklaşık 1 km kala bildirim al.</p><button class="btn primary" data-near-notify>📍 Yaklaşınca bildirimi aç</button></div>}}
 function planner(){let want=places.filter(p=>!p.done);let picks=want.slice(0,4);let text=picks.length?picks.map((p,i)=>(i+1)+". "+p.name+" — "+p.city+" ("+p.cat+")").join("\n"):"Önce birkaç yer kaydet.";document.getElementById("content").innerHTML='<section class="hero"><h1>✨ Gezi planın</h1><p>Kaydettiğin yerlere göre hızlı bir plan.</p></section><div class="card"><div style="white-space:pre-line;line-height:1.7">'+esc(text)+'</div><div class="actions"><button class="btn primary" onclick="share({name:'KayDate gezi planım',city:'',url:location.href})">↗️ Planı paylaş</button></div></div><div class="section"><h2>💡 İpucu</h2></div><div class="card">Gerçek yapay zekâ planlayıcısı için ileride bir AI API anahtarı bağlayacağız; bu MVP sürümünde planlama tamamen cihaz üzerinde çalışıyor.</div>'}
 function importLink(){let u=document.getElementById("importLink").value.trim();if(!u)return alert("Bir bağlantı gir.");places.unshift({name:"Paylaşılan yer",city:"",cat:"Diğer",done:false,note:"Bağlantıdan kaydedildi",url:u});save();alert("Bağlantı KayDate'e kaydedildi.");show("saved",document.querySelectorAll(".nav button")[3])}
 function openAdd(){document.getElementById("modal").style.display="flex"}function closeAdd(){document.getElementById("modal").style.display="none"}
@@ -118,8 +118,10 @@ render();
 (function(){
 const oldSave=window.save;
 window.save=function(){localStorage.setItem("kaydate-v3",JSON.stringify(window.places));};
-window.places=JSON.parse(localStorage.getItem("kaydate-v3")||"null")||window.places||[];
-if(!window.places.length){window.places=[{name:"Zeugma Mozaik Müzesi",city:"Gaziantep",cat:"Gezi",done:false,note:"",url:""},{name:"Karaköy",city:"İstanbul",cat:"Gezi",done:false,note:"",url:""}];window.save();}
+const storedPlaces=JSON.parse(localStorage.getItem("kaydate-v3")||"null");
+if(Array.isArray(storedPlaces)&&storedPlaces.length){places.splice(0,places.length,...storedPlaces);}
+else if(!places.length){places.push({name:"Zeugma Mozaik Müzesi",city:"Gaziantep",cat:"Gezi",done:false,note:"",url:""},{name:"Karaköy",city:"İstanbul",cat:"Gezi",done:false,note:"",url:""});window.save();}
+window.places=places;
 window.maps=function(p){location.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.name+" "+p.city)};
 window.share=function(p){const u=p.url||location.href; if(navigator.share) navigator.share({title:p.name,text:"KayDate: "+p.name+" — "+p.city,url:u}); else navigator.clipboard?.writeText(u).then(()=>alert("Bağlantı kopyalandı."));};
 window.card=function(p,i){return '<article class="card">'+(p.photo?'<img src="'+p.photo+'" style="width:100%;height:170px;object-fit:cover;border-radius:14px;margin-bottom:10px">':'')+'<h3>'+esc(p.name)+'</h3><div class="meta">📍 '+esc(p.city||"")+' · '+esc(p.cat)+(p.done?' · 🟢 Gidildi':'')+'</div>'+(p.note?'<div style="margin-top:8px;color:#555">'+esc(p.note)+'</div>':'')+'<div class="actions"><button class="btn save" onclick="toggle('+i+')">'+(p.done?'↩️ Tekrar planla':'❤️ Gitmek istiyorum')+'</button><button class="btn" onclick="maps(places['+i+'])">🧭 Rota</button><button class="btn" onclick="share(places['+i+'])">↗️ Paylaş</button></div></article>';};
@@ -133,19 +135,36 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 (function(){
 const esc2=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 window.esc=esc2;
-window.render=function(q=""){const a=window.places.filter(p=>(p.name+" "+(p.city||"")+" "+p.cat+" "+(p.note||"")).toLowerCase().includes(q.toLowerCase()));document.getElementById("content").innerHTML='<section class="hero"><h1>Bugün nereye gitmek istersin?</h1><p>Beğendiğin yerleri kaydet, planla ve git.</p><button class="btn" onclick="planner()" style="margin-top:14px">✨ Bana gezi planla</button></section><div class="row">'+["Tümü","Restoran","Kafe","Gezi","Doğa","Otel","Plaj"].map(x=>'<button class="chip" onclick="filterCat(\''+x+'\')">'+x+'</button>').join("")+'</div><div class="section"><h2>✨ Keşfet</h2></div><div class="cards">'+(a.map(card).join("")||'<div class="empty">Sonuç bulunamadı.</div>')+'</div>';};
-window.toggle=function(i){window.places[i].done=!window.places[i].done;save();render(document.getElementById("search").value);};
-window.filterCat=function(cat){if(cat==="Tümü"){render(document.getElementById("search").value);return;}const a=window.places.filter(p=>p.cat===cat);document.getElementById("content").innerHTML='<div class="section"><h2>'+esc(cat)+'</h2></div><div class="cards">'+a.map((p,i)=>card(p,window.places.indexOf(p))).join("")+'</div>';};
-render();
-})();
-</script><script>
-let authMode="login";
-window.authOpen=function(m){authMode=m;document.getElementById("authtitle").textContent=m==="login"?"KayDate'e giriş":"KayDate'e kayıt ol";document.getElementById("authmodal").style.display="flex"};
-window.authClose=function(){document.getElementById("authmodal").style.display="none"};
-window.authSubmit=async function(){const email=document.getElementById("aemail").value.trim(),password=document.getElementById("apass").value;if(!email||password.length<6)return alert("E-posta ve en az 6 karakter şifre gerekli.");const r=authMode==="login"?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password});if(r.error)return alert(r.error.message);authClose();updateAuth()};
-window.updateAuth=async function(){const {data}=await sb.auth.getUser();const b=document.getElementById("authbar"),p=document.getElementById("authpill");if(data.user){b.innerHTML='<button onclick="logout()">Çıkış yap</button>';p.textContent="☁️ Buluta bağlı: "+data.user.email}else{p.textContent="Cihazda çalışan misafir modu aktif."}};
-window.logout=async function(){await sb.auth.signOut();updateAuth()};
-window.syncPlaces=async function(){const {data:{user}}=await sb.auth.getUser();if(!user)return;for(const p of places){let {data:pl}=await sb.from("places").select("id").eq("name",p.name).eq("city",p.city||"").maybeSingle();if(!pl){const ins=await sb.from("places").insert({name:p.name,city:p.city||null,category:p.cat,source_url:p.url||null}).select("id").single();pl=ins.data}if(pl)await sb.from("saved_places").upsert({user_id:user.id,place_id:pl.id,status:p.done?"visited":"want",note:p.note||null},{onConflict:"user_id,place_id"});}};
+window.render=function(q=""){const activeFilter=window.filter||"Tümü";const a=window.places.filter(p=>(activeFilter==="Tümü"||p.cat===activeFilter)&&(p.name+" "+(p.city||"")+" "+p.cat+" "+(p.note||"")).toLowerCase().includes(q.toLowerCase()));document.getElementById("content").innerHTML='<section class="hero"><h1>Bugün nereye gitmek istersin?</h1><p>Beğendiğin yerleri kaydet, planla ve git.</p><button class="btn" onclick="planner()" style="margin-top:14px">✨ Bana gezi planla</button></section><div class="row">'+["Tümü","Restoran","Kafe","Gezi","Doğa","Otel","Plaj"].map(x=>'<button class="chip" onclick="filterCat(\''+x+'\')">'+x+'</button>').join("")+'</let authMode="login";
+window.authOpen=function(m){authMode=m;document.getElementById("authtitle").textContent=m==="login"?"KayDate'e giriş":"KayDate'e kayıt ol";document.getElementById("authmodal").style.display="flex";document.getElementById("quickAuth").style.display=m==="signup"?"block":"none";document.getElementById("aphone").style.display="none";};
+window.authClose=function(){document.getElementById("authmodal").style.display="none";};
+window.authSubmit=async function(){
+ const email=document.getElementById("aemail").value.trim(),password=document.getElementById("apass").value;
+ if(!email||password.length<6)return alert("E-posta ve en az 6 karakter şifre gerekli.");
+ const r=authMode==="login"?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password});
+ if(r.error)return alert(r.error.message);
+ authClose();updateAuth();
+};
+window.socialAuth=async function(provider){
+ const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:location.origin+location.pathname}});
+ if(error)alert(error.message);
+};
+window.phoneAuthStart=async function(){
+ const phone=prompt("Cep telefonu numaranı ülke koduyla gir (+90...):");
+ if(!phone)return;
+ const {error}=await sb.auth.signInWithOtp({phone});
+ if(error)return alert(error.message);
+ const code=prompt("SMS ile gelen 6 haneli kodu gir:");
+ if(!code)return;
+ const r=await sb.auth.verifyOtp({phone,token:code,type:"sms"});
+ if(r.error)return alert(r.error.message);
+ authClose();updateAuth();
+};
+window.instagramInfo=function(){
+ alert("Instagram ile doğrudan giriş Supabase'in yerleşik sosyal sağlayıcıları arasında yok. Instagram'ı sahte giriş olarak göstermiyoruz. Meta/Instagram OAuth kurulumu için özel OAuth/OIDC sağlayıcısı yapılandırılabilir.");
+};
+window.updateAuth=async function(){const {data}=await sb.auth.getUser();const b=document.getElementById("authbar"),p=document.getElementById("authpill");if(data.user){b.innerHTML='<button onclick="logout()">Çıkış yap</button>';p.textContent="☁️ Buluta bağlı: "+(data.user.email||data.user.phone||"hesap")}else{p.textContent="Cihazda çalışan misafir modu aktif."}};
+window.logout=async function(){await sb.auth.signOut();updateAuth()};gle();pl=ins.data}else{await sb.from("places").update({category:p.cat,description:p.note||null,address:p.address||null,latitude:Number.isFinite(Number(p.latitude))?Number(p.latitude):null,longitude:Number.isFinite(Number(p.longitude))?Number(p.longitude):null,source_url:p.url||null,cover_url:p.photo||null}).eq("id",pl.id);}if(pl)await sb.from("saved_places").upsert({user_id:user.id,place_id:pl.id,status:p.done?"visited":"want",note:p.note||null},{onConflict:"user_id,place_id"});}};
 const oldAdd=window.addPlace;window.addPlace=async function(){oldAdd();setTimeout(syncPlaces,400)};
 updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
 </script>
@@ -324,25 +343,270 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
 })();
 </script><script>
 (function(){
- function incomingShare(){
+ async function incomingShare(){
   const p=new URLSearchParams(location.search);
   const title=(p.get("title")||"").trim();
   const text=(p.get("text")||"").trim();
   const url=(p.get("url")||"").trim();
   if(!title&&!text&&!url)return;
+
   const cleanUrl=url||((text.match(/https?:\/\/[^\s]+/i)||[])[0]||"");
   const note=text.replace(cleanUrl,"").trim();
-  const name=(title&&title.length>2)?title:"Paylaşılan yer";
-  const n=document.getElementById("name"),c=document.getElementById("city"),cat=document.getElementById("cat"),nt=document.getElementById("note"),u=document.getElementById("url");
-  if(n)n.value=name;
-  if(c)c.value="";
-  if(cat)cat.value="Diğer";
-  if(nt)nt.value=note||"Sosyal medyadan paylaşıldı";
-  if(u)u.value=cleanUrl;
+  const rawName=(title&&title.length>2)?title:"Paylaşılan yer";
+  const nameKey=(title+" "+text).toLowerCase();
+  const inferredCat=/restaurant|restoran|yemek|food|cafe|kahve|coffee|brunch|bar/i.test(nameKey)?"Restoran":/hotel|otel|resort/i.test(nameKey)?"Otel":/beach|plaj|sahil/i.test(nameKey)?"Plaj":/park|doğa|nature|forest|orman/i.test(nameKey)?"Doğa":"Diğer";
+  const isGoogleMaps=/google\.[^/]+\/maps|maps\.google\./i.test(cleanUrl);
+  const isMapsLink=/maps/i.test(cleanUrl);
+  const looksLikePlaceName=rawName!=="Paylaşılan yer" && rawName.length>=3 && rawName.length<=100;
+  let resolved=null;
+
+  // Google Maps paylaşımında başlık çoğunlukla gerçek mekân adıdır.
+  // Önce gerçek yer sağlayıcısında eşleştirmeyi deniyoruz; başarısız olursa bağlantıyı yine kaydediyoruz.
+  if(looksLikePlaceName && (isGoogleMaps||isMapsLink)){
+    try{
+      const {data,error}=await sb.functions.invoke("search-places",{
+        body:{query:rawName,radius:50000}
+      });
+      if(!error && data?.places?.length){
+        const candidates=data.places;
+        const exact=candidates.find(x=>String(x.name||"").toLowerCase()===rawName.toLowerCase());
+        resolved=exact||candidates[0];
+      }
+    }catch(e){console.warn("Paylaşım mekan eşleştirme:",e);}
+  }
+
+  const cleanName=resolved?.name||rawName;
+  const duplicate=window.places.some(x=>
+    (cleanUrl&&x.url===cleanUrl) ||
+    (resolved?.external_id&&x.external_id===resolved.external_id) ||
+    (cleanName!=="Paylaşılan yer"&&x.name===cleanName&&(!x.city||x.city===resolved?.city))
+  );
+
+  if(!duplicate){
+    window.places.unshift({
+      name:cleanName,
+      city:resolved?.city||"",
+      cat:resolved?.category||inferredCat,
+      done:false,
+      note:note||"Sosyal medyadan kaydedildi",
+      url:cleanUrl||resolved?.website||"",
+      source:"share",
+      external_id:resolved?.external_id||"",
+      provider:resolved?.provider||"",
+      latitude:resolved?.latitude,
+      longitude:resolved?.longitude,
+      address:resolved?.address||""
+    });
+    save();
+    if(window.syncPlaces)window.syncPlaces().catch(()=>{});
+  }
+
   const modal=document.getElementById("modal");
-  if(modal)modal.style.display="flex";
+  if(modal)modal.style.display="none";
+  const content=document.getElementById("content");
+  if(content){
+    const toast=document.createElement("div");
+    toast.className="card";
+    toast.style="position:fixed;left:18px;right:18px;bottom:92px;z-index:30;background:#17152c;color:#fff;border:0";
+    toast.innerHTML="<b>❤️ KayDate'e kaydedildi</b><div style='margin-top:4px;opacity:.8'>"+esc(cleanName)+(resolved?" · 📍 Mekân bulundu":" · 🔗 Bağlantı kaydedildi")+"</div>";
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),3200);
+  }
   history.replaceState({},document.title,location.pathname);
  }
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",incomingShare);else incomingShare();
 })();
-</script></body></html>
+</script>
+<script>
+(function(){
+  const leafletCss="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  const leafletJs="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  let leafletPromise=null;
+  function loadLeaflet(){
+    if(window.L)return Promise.resolve(window.L);
+    if(leafletPromise)return leafletPromise;
+    leafletPromise=new Promise((resolve,reject)=>{
+      if(!document.querySelector('link[data-kd-leaflet]')){
+        const link=document.createElement("link");link.rel="stylesheet";link.href=leafletCss;link.dataset.kdLeaflet="1";document.head.appendChild(link);
+      }
+      const s=document.createElement("script");s.src=leafletJs;s.onload=()=>resolve(window.L);s.onerror=reject;document.head.appendChild(s);
+    });
+    return leafletPromise;
+  }
+  async function renderRealMap(){
+    const c=document.getElementById("content"); if(!c)return;
+    let box=document.getElementById("kd-real-map");
+    if(!box){
+      box=document.createElement("div");box.id="kd-real-map";
+      box.style="height:390px;border-radius:20px;overflow:hidden;margin:14px 18px;background:#eef0f4;box-shadow:0 8px 24px rgba(0,0,0,.08)";
+      const hero=c.querySelector(".hero"); if(hero) hero.insertAdjacentElement("afterend",box); else c.prepend(box);
+    }
+    box.innerHTML='<div style="padding:20px">🗺️ Harita yükleniyor…</div>';
+    try{
+      const L=await loadLeaflet();
+      const points=window.places.filter(p=>Number.isFinite(Number(p.latitude))&&Number.isFinite(Number(p.longitude)));
+      let center=points.length?[Number(points[0].latitude),Number(points[0].longitude)]:[39.0,35.0];
+      const map=L.map(box).setView(center,points.length?11:6);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap katkıcıları"}).addTo(map);
+      const markers=[];
+      points.forEach((p,i)=>{
+        const m=L.marker([Number(p.latitude),Number(p.longitude)]).addTo(map);
+        m.bindPopup("<b>"+esc(p.name)+"</b><br>"+esc(p.city||"")+"<br><button onclick='maps(window.places["+window.places.indexOf(p)+"])'>🧭 Google Maps</button>");
+        markers.push(m);
+      });
+      if(points.length>1){
+        const group=L.featureGroup(markers);map.fitBounds(group.getBounds().pad(.18));
+      }
+      setTimeout(()=>map.invalidateSize(),120);
+      if(!points.length){
+        box.insertAdjacentHTML("beforeend",'<div style="position:absolute;z-index:1000;margin:12px;padding:10px 12px;background:white;border-radius:12px">Koordinatlı kayıt ekledikçe burada görünecek.</div>');
+      }
+    }catch(e){
+      console.warn("KayDate harita:",e);
+      box.innerHTML='<div style="padding:20px">Harita yüklenemedi. Mekânları aşağıdaki listeden açabilirsin.</div>';
+    }
+  }
+
+  const oldShow=window.show;
+  window.show=function(t,el){
+    oldShow(t,el);
+    if(t==="map") setTimeout(renderRealMap,80);
+  };
+
+  const oldPlanner=window.planner;
+  window.planner=async function(){
+    const want=window.places.filter(p=>!p.done).slice(0,12);
+    const c=document.getElementById("content");
+    if(!c)return;
+    c.innerHTML='<section class="hero"><h1>✨ Gezi planın</h1><p>Yapay zekâ kaydettiğin yerler arasında bir rota oluşturuyor…</p></section><div class="card"><div class="empty">🤖 Plan hazırlanıyor…</div></div>';
+    if(!want.length){oldPlanner();return;}
+    try{
+      const {data,error}=await sb.functions.invoke("plan-trip",{
+        body:{places:want,request:"Kaydettiğim yerlerden pratik ve dengeli bir gezi planı oluştur. Yerleri birbirine yakınlık, kategori çeşitliliği ve gün içindeki mantıklı sıraya göre grupla. Türkçe yaz; kısa ve uygulanabilir olsun."}
+      });
+      if(error)throw error;
+      const text=data?.text||"";
+      if(!text)throw new Error("Boş plan");
+      c.innerHTML='<section class="hero"><h1>✨ AI gezi planın</h1><p>Kaydettiğin yerlere göre hazırlandı.</p></section><div class="card" style="white-space:pre-line;line-height:1.8">'+esc(text)+'</div><div class="actions"><button class="btn primary" onclick="share({name:\'KayDate AI gezi planım\',city:\'\',url:location.href})">↗️ Planı paylaş</button></div>';
+    }catch(e){
+      console.warn("AI planlayıcı:",e);
+      oldPlanner();
+    }
+  };
+})();
+</script>
+<script>
+(function(){
+  window.loadCloudPlaces=async function(){
+    try{
+      const {data:{user}}=await sb.auth.getUser();
+      if(!user)return;
+      const {data,error}=await sb.from("saved_places").select("status,note,visit_date,rating,places(*)").eq("user_id",user.id);
+      if(error)throw error;
+      let changed=false;
+      (data||[]).forEach(row=>{
+        const p=row.places;if(!p)return;
+        const exists=window.places.some(x=>(x.external_id&&p.external_id&&x.external_id===p.external_id)||(x.name===p.name&&x.city===(p.city||"")));
+        if(!exists){
+          window.places.push({name:p.name||"İsimsiz mekan",city:p.city||"",cat:p.category||"Diğer",done:row.status==="visited",note:row.note||"",url:p.source_url||p.maps_url||"",photo:p.cover_url||"",latitude:p.latitude,longitude:p.longitude});
+          changed=true;
+        }
+      });
+      if(changed){save();render();}
+    }catch(e){console.warn("KayDate bulut senkronizasyonu:",e);}
+  };
+  const oldUpdateAuth=window.updateAuth;
+  window.updateAuth=async function(){
+    await oldUpdateAuth();
+    const {data:{user}}=await sb.auth.getUser();
+    if(user) window.loadCloudPlaces();
+  };
+  window.loadCloudPlaces();
+})();
+</script><script>
+(function(){
+  const RADIUS_METERS=15000;
+  const COOLDOWN_MS=24*60*60*1000;
+  let watchId=null;
+  const notified=JSON.parse(localStorage.getItem("kaydate-near-notified")||"{}");
+
+  function distance(a,b,c,d){
+    const R=6371000, p1=a*Math.PI/180, p2=c*Math.PI/180, dp=(c-a)*Math.PI/180, dl=(d-b)*Math.PI/180;
+    const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+    return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+  }
+  async function notifyPlace(p,meters){
+    const key=(p.external_id||p.name)+"|"+Math.round(Number(p.latitude)*1000)+"|"+Math.round(Number(p.longitude)*1000);
+    if(notified[key]&&Date.now()-notified[key]<COOLDOWN_MS)return;
+    notified[key]=Date.now();
+    localStorage.setItem("kaydate-near-notified",JSON.stringify(notified));
+    const title="📍 KayDate yakınında";
+    const body=p.name+" yaklaşık "+Math.max(50,Math.round(meters/50)*50)+" m uzakta.";
+    if("Notification" in window && Notification.permission==="granted"){
+      if(navigator.serviceWorker?.controller){
+        navigator.serviceWorker.controller.postMessage({type:"NEAR_PLACE",title,body,url:location.href});
+      }else new Notification(title,{body});
+    }else{
+      const toast=document.createElement("div");
+      toast.className="card";
+      toast.style="position:fixed;left:18px;right:18px;bottom:92px;z-index:50;background:#17152c;color:#fff;border:0";
+      toast.innerHTML="<b>"+esc(title)+"</b><div style='margin-top:4px;opacity:.8'>"+esc(body)+"</div>";
+      document.body.appendChild(toast);setTimeout(()=>toast.remove(),5000);
+    }
+  }
+  function checkPosition(pos){
+    const lat=pos.coords.latitude,lng=pos.coords.longitude;
+    window.places.filter(p=>!p.done&&Number.isFinite(Number(p.latitude))&&Number.isFinite(Number(p.longitude))).forEach(p=>{
+      const m=distance(lat,lng,Number(p.latitude),Number(p.longitude));
+      if(m<=RADIUS_METERS)notifyPlace(p,m);
+    });
+  }
+  async function startNearMe(){
+    if(!("geolocation" in navigator))return;
+    if("Notification" in window && Notification.permission==="default"){
+      try{await Notification.requestPermission();}catch(e){}
+    }
+    if(watchId!==null)return;
+    watchId=navigator.geolocation.watchPosition(checkPosition,()=>{},{
+      enableHighAccuracy:false,maximumAge:120000,timeout:15000
+    });
+  }
+  window.enableNearPlaceNotifications=startNearMe;
+  // Kullanıcı konum iznini daha önce verdiyse otomatik devam et.
+  if(localStorage.getItem("kaydate-near-enabled")==="1")startNearMe();
+  window.addEventListener("focus",()=>{if(localStorage.getItem("kaydate-near-enabled")==="1")startNearMe();});
+  document.addEventListener("click",e=>{
+    const b=e.target.closest?.("[data-near-notify]");
+    if(!b)return;
+    localStorage.setItem("kaydate-near-enabled","1");
+    startNearMe();
+    b.textContent="📍 Yaklaşınca bildirim açık";
+    b.disabled=true;
+  });
+})();
+</script>
+<script>
+(function(){
+ window.todayPick=async function(){
+  const c=document.getElementById("content");
+  const places=window.places.filter(p=>!p.done);
+  if(!places.length){alert("Önce birkaç yer kaydet panpa ❤️");return;}
+  c.innerHTML='<section class="hero"><h1>✨ Bugün ne yapalım?</h1><p>KayDate hafızanı tarıyorum…</p></section><div class="card"><div class="empty">🤖 Sana uygun yerler seçiliyor…</div></div>';
+  try{
+   const {data,error}=await sb.functions.invoke("plan-trip",{body:{
+    places:places.slice(0,20),
+    request:"Bugün için 3 farklı seçenek üret. Kaydedilmiş yerler arasından seç. Her seçenek için mekân adı, neden bugün uygun olduğu ve kısa bir öneri yaz. Ziyaret edilmemiş yerleri tercih et. Mesafe/şehir bilgisi varsa dikkate al. Türkçe, kısa ve samimi yaz. Kullanıcıya tek bir zorunlu seçim yaptırma; seçenekleri karşılaştırılabilir ver."
+   }});
+   if(error)throw error;
+   const out=data?.text||"";
+   if(!out)throw new Error("Boş öneri");
+   c.innerHTML='<section class="hero"><h1>✨ Bugünün seçenekleri</h1><p>KayDate hafızandaki yerlere göre.</p></section><div class="card" style="white-space:pre-line;line-height:1.8">'+esc(out)+'</div><div class="actions"><button class="btn primary" onclick="show(\'saved\',document.querySelectorAll(\'.nav button\')[1])">❤️ Kayıtlarıma dön</button><button class="btn light" onclick="todayPick()">🔄 Yenile</button></div>';
+  }catch(e){
+   console.warn("Bugün ne yapalım:",e);
+   const pick=places.slice(0,3).map((p,i)=>(i+1)+". "+p.name+" — "+(p.city||"Konum bilgisi yok")).join("\n");
+   c.innerHTML='<section class="hero"><h1>✨ Bugünün seçenekleri</h1><p>AI şu anda ulaşılmazsa kayıtlarından hızlı seçim.</p></section><div class="card" style="white-space:pre-line;line-height:1.8">'+esc(pick)+'</div>';
+  }
+ };
+})();
+</script>
+</body></html>
