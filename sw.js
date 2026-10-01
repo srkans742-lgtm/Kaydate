@@ -1,4 +1,4 @@
-const CACHE="kaydate-v7";
+const CACHE="kaydate-v8-auth";
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./","./index.html","./manifest.webmanifest","./share-target.html"])).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 self.addEventListener("message",e=>{if(e.data?.type==="NEAR_PLACE"){e.waitUntil(self.registration.showNotification(e.data.title||"KayDate", {body:e.data.body||"Kaydettiğin bir yere yaklaştın.",icon:"./icon-192.png",badge:"./icon-192.png",data:{url:e.data.url||"./"}}));}});
