@@ -341,8 +341,26 @@ updateAuth();sb.auth.onAuthStateChange(()=>updateAuth());
   if(cat)cat.value="Diğer";
   if(nt)nt.value=note||"Sosyal medyadan paylaşıldı";
   if(u)u.value=cleanUrl;
+  const nameKey=(title+" "+text).toLowerCase();
+  const inferredCat=/restaurant|restoran|yemek|food|cafe|kahve|coffee|brunch|bar/i.test(nameKey)?"Restoran":/hotel|otel|resort/i.test(nameKey)?"Otel":/beach|plaj|sahil/i.test(nameKey)?"Plaj":/park|doğa|nature|forest|orman/i.test(nameKey)?"Doğa":"Diğer";
+  const cleanName=name&&name!=="Paylaşılan yer"?name:"Paylaşılan yer";
+  const duplicate=window.places.some(x=>(cleanUrl&&x.url===cleanUrl)||(cleanName!=="Paylaşılan yer"&&x.name===cleanName));
+  if(!duplicate){
+    window.places.unshift({name:cleanName,city:"",cat:inferredCat,done:false,note:note||"Sosyal medyadan kaydedildi",url:cleanUrl,source:"share"});
+    save();
+    if(window.syncPlaces)window.syncPlaces().catch(()=>{});
+  }
   const modal=document.getElementById("modal");
-  if(modal)modal.style.display="flex";
+  if(modal)modal.style.display="none";
+  const content=document.getElementById("content");
+  if(content){
+    const toast=document.createElement("div");
+    toast.className="card";
+    toast.style="position:fixed;left:18px;right:18px;bottom:92px;z-index:30;background:#17152c;color:#fff;border:0";
+    toast.innerHTML="<b>❤️ KayDate'e kaydedildi</b><div style='margin-top:4px;opacity:.8'>"+esc(cleanName)+"</div>";
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),3200);
+  }
   history.replaceState({},document.title,location.pathname);
  }
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",incomingShare);else incomingShare();
